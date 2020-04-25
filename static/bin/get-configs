@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+
+LISTEN_PORT=`snapctl get port`
+
+if [ ! -z "$LISTEN_PORT" ]; then
+    export LISTEN_PORT
+fi
+
+exec "$@"

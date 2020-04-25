@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+
+ snapctl restart ${SNAP_NAME}.api 2>&1 || true
+
+exit

@@ -10,10 +10,8 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/jdkato/prose/tokenize"
 	"github.com/ryanjyoder/sofp"
 	"golang.org/x/sync/semaphore"
-	"jaytaylor.com/html2text"
 )
 
 func main() {
@@ -27,15 +25,15 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	words := make(chan string)
+	docs := make(chan string)
 
 	go func() {
-		defer close(words)
+		defer close(docs)
 
 		scanner := bufio.NewScanner(file)
 		content, errs := getContent(scanner)
 		wg := sync.WaitGroup{}
-		maxWorkers := runtime.GOMAXPROCS(0)+2
+		maxWorkers := runtime.GOMAXPROCS(0) + 2
 		sem := semaphore.NewWeighted(int64(maxWorkers))
 		ctx := context.TODO()
 		fmt.Fprintf(os.Stderr, "parsing with %d workds\n", maxWorkers)
@@ -47,12 +45,17 @@ func main() {
 			}
 			wg.Add(1)
 
-			go func() {
+			go func(l string) {
 				defer wg.Done()
 				defer sem.Release(1)
 
-				tokenizeText(line, words)
-			}()
+				doc, err := formatDocument(l)
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					return
+				}
+				docs <- doc
+			}(line)
 		}
 		wg.Wait()
 		if err := <-errs; err != nil {
@@ -61,25 +64,53 @@ func main() {
 		}
 	}()
 
-	for word := range words {
-		fmt.Println(word)
+	fmt.Println(`<?xml version="1.0" ?>`)
+	fmt.Println("<add>")
+	for doc := range docs {
+		fmt.Println(doc)
 	}
+	fmt.Println("</add>")
 
 }
 
-func tokenizeText(line string, out chan string) {
-	text, _ := html2text.FromString(line)
-	words := tokenize.TextToWords(text)
-	uniqueWords := map[string]bool{}
-	for i, word := range words {
-		uniqueWords[word] = true
-		if i < len(words)-1{
-			uniqueWords[word+" "+words[i+1]] = true
-		}
+type Doc struct {
+	XMLName xml.Name `xml:"doc"`
+	Fields  []Field  `xml:"field"`
+}
+type Field struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:",chardata"`
+}
+
+func formatDocument(line string) (string, error) {
+	row := &sofp.Row{}
+	if err := xml.Unmarshal([]byte(line), row); err != nil {
+		return "", err
 	}
-	for word := range uniqueWords {
-		out <- word
+	if row.ID == nil {
+		return "", fmt.Errorf("nil PostId")
 	}
+	doc := Doc{Fields: []Field{{
+		Name:  "Id",
+		Value: fmt.Sprintf("%d", *row.ID),
+	}, {
+		Name:  "Title",
+		Value: row.Title,
+	}, {
+		Name:  "Body",
+		Value: row.Body,
+	}}}
+
+	xmlBytes, _ := xml.Marshal(doc)
+	return string(xmlBytes), nil
+
+}
+
+func pointerToString(p *string) string {
+	if p == nil {
+		return ""
+	}
+	return *p
 }
 
 type Scanner interface {
@@ -93,18 +124,11 @@ func getContent(scanner Scanner) (<-chan string, <-chan error) {
 	errs := make(chan error)
 
 	go func() {
-			defer close(lines)
-			defer close(errs)
+		defer close(lines)
+		defer close(errs)
 		for scanner.Scan() {
-
 			line := scanner.Text()
-			row := &sofp.Row{}
-			if err := xml.Unmarshal([]byte(line), row); err != nil {
-				log.Println("error parsing row:", err)
-				continue
-			}
-
-			lines <- row.Title + " " + row.Body
+			lines <- line
 		}
 		if err := scanner.Err(); err != nil {
 			errs <- err

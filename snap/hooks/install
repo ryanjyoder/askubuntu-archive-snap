@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+
+snapctl stop --disable  ${SNAP_NAME}.buildindex 2>&1 || true
+
+exit

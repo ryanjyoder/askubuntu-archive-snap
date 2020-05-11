@@ -10,13 +10,27 @@ description: |
 
 grade: devel 
 confinement: strict
+environment:
+  PATH: $PATH:$SNAP/usr/lib/jvm/default-java/bin
 
 apps:
   cli:
     command: cli
-    environment:
-      POSTS_XML: $SNAP/Posts.xml
-      INDEX_DB: $SNAP/lookup.db
+    command-chain: [bin/get-configs]
+
+  solr:
+    command: start_solr 
+    command-chain: [bin/get-configs]
+    daemon: simple
+    plugs: [network-bind, network]
+  
+  buildindex:
+    command: build_index
+    command-chain: [bin/get-configs]
+    daemon: oneshot
+    plugs: [network]
+
+  
   api:
     command: api
     daemon: simple
@@ -29,29 +43,31 @@ apps:
 
 parts:
   go-binaries:
-    source: pkg
+    source: .
     plugin: go
     build-packages: [git, gcc]
     override-build: |
-      cd cmd/cli
-      go get -u 
-      cd ../../
-      cd cmd/api
-      go get -u 
-
-      cd ../../
-      go build cmd/cli/cli.go
-      go build cmd/api/api.go
+      cd pkg
+      for i in api cli solrformatter
+      do
+        cd "cmd/$i"
+        go get -u 
+        cd ../../
+        go build "cmd/$i/$i.go"
+      done
+      
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin/
-      cp cli api $SNAPCRAFT_PART_INSTALL/bin/
+      cp cli api solrformatter $SNAPCRAFT_PART_INSTALL/bin/
 
   static:
     source: static
     plugin: dump
+    stage-packages: [curl]
 
   archive:
     plugin: dump
-    source: https://archive.org/download/stackexchange/askubuntu.com.7z
+    #source: https://archive.org/download/stackexchange/askubuntu.com.7z
+    source: http://192.168.1.104:8080/stackexchange/askubuntu.com.7z
     #source: archive
     build-packages: [p7zip-full, sqlite3, mawk]
     stage-packages: [sqlite3]
@@ -73,6 +89,7 @@ parts:
 
       sqlite3 -csv lookup.db ".import lookup.csv posts"
       sqlite3 lookup.db 'CREATE INDEX question_id_index ON posts(question_id);'
+      sqlite3 lookup.db 'CREATE INDEX id_index ON posts(id);'
       sqlite3 lookup.db 'UPDATE posts SET start = CAST(start AS NUMBER);'
       snapcraftctl build
 
@@ -80,3 +97,9 @@ parts:
     - Posts.xml
     - lookup.db
     - usr
+    
+  solr:
+    after: [archive]
+    source: https://apache.osuosl.org/lucene/solr/8.5.1/solr-8.5.1.tgz
+    plugin: dump
+    stage-packages: [default-jre]

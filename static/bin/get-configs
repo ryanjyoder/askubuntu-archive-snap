@@ -6,4 +6,9 @@ if [ ! -z "$LISTEN_PORT" ]; then
     export LISTEN_PORT
 fi
 
+
+export SOLR_SERVER_DIR="$SNAP_COMMON/server"
+export POSTS_XML="$SNAP/Posts.xml"
+export INDEX_DB="$SNAP/lookup.db"
+
 exec "$@"

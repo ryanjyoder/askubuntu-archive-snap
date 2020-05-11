@@ -44,7 +44,11 @@ func NewXmlStore(xmlFile io.ReadSeeker, db SqlDB) (*XmlStore, error) {
 		xmlFile: xmlFile,
 		indexDB: db,
 	}
-	stmt, err := db.Prepare("SELECT start, length FROM posts WHERE question_id = ? ")
+	stmt, err := db.Prepare(`
+		SELECT 
+			start, length 
+		FROM posts 
+		WHERE question_id = (SELECT question_id FROM posts WHERE id = ? LIMIT 1) `)
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/ryanjyoder/askubuntu"
+	askubuntu "github.com/ryanjyoder/askubuntu/pkg"
 )
 
 func main() {

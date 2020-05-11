@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+current_posts_size=`ls -s $POSTS_XML`
+indexed_size=`cat $SNAP_DATA/indexed_size`
+if [ "$current_posts_size" == "$indexed_size" ]
+then
+    exit 0
+fi
+
+healthcheck_url="http://localhost:8983/"
+
+curl "$healthcheck_url"
+while [ $? -ne 0 ]
+do
+    echo "Waiting for solr to start"
+    sleep 5
+    curl "$healthcheck_url"
+done
+
+solr create -c askubuntu -force 
+
+curl http://localhost:8983/solr/askubuntu/schema -X POST -H 'Content-type:application/json' --data-binary '{
+    "add-field" : {"name":"Id", "type":"string", "multiValued":false, "stored":true, "required":true},
+    "add-field" : {"name":"QuestionId", "type":"string", "multiValued":false, "stored":true, "required":true},
+    "add-field" : {"name":"Title", "type":"text_en", "stored":true, "indexed":true},
+    "add-field" : {"name":"Body", "type":"text_en", "stored":false, "indexed":true}
+}'
+
+cat "$POSTS_XML" | solrformatter | post -d -c askubuntu 
+
+echo "$current_posts_size" > $SNAP_DATA/indexed_size

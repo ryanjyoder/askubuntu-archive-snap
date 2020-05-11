@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+
+conf_dir="$SOLR_SERVER_DIR/conf"
+
+if [ ! -d "$conf_dir" ]; then
+    cp -r "$SNAP/server" "$SOLR_SERVER_DIR"
+    cp -r "$SNAP/server/solr/configsets/_default/conf" "$conf_dir"
+fi
+
+snapctl start ${SNAP_NAME}.buildindex &
+
+snapctl start 
+
+solr start -force -f 

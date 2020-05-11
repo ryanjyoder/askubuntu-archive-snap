@@ -1,0 +1,25 @@
+curl http://localhost:8983/solr/askubuntu/schema -X POST -H 'Content-type:application/json' --data-binary '{
+    "add-field" : {"name":"Id", "type":"string", "multiValued":false, "stored":true, "required":true},
+    "add-field" : {"name":"Title", "type":"text_en", "stored":false, "indexed":true},
+    "add-field" : {"name":"Body", "type":"text_en", "stored":false, "indexed":true}
+}'
+
+
+  Id="1" 
+  PostTypeId="1" 
+  ParentId
+  AcceptedAnswerId="2" 
+  CreationDate="2010-07-28T19:04:21.300" 
+  Score="60" 
+  ViewCount="3866" 
+  Body=""
+  OwnerUserId="5" 
+  LastEditorUserId="208574" 
+  LastEditDate="2014-12-16T01:47:45.980" 
+  LastActivityDate="2018-10-05T23:56:48.997" 
+  Title="How to get the &quot;Your battery is broken&quot; message to go away?" 
+  Tags="&lt;power-management&gt;&lt;notification&gt;" 
+  AnswerCount="4" 
+  CommentCount="2" 
+  FavoriteCount="7" 
+    

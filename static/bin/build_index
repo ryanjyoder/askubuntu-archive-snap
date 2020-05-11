@@ -2,7 +2,7 @@
 
 current_posts_size=`ls -s $POSTS_XML`
 indexed_size=`cat $SNAP_DATA/indexed_size`
-if [ "$current_posts_size" == "$indexed_size" ]
+if [ "$current_posts_size" = "$indexed_size" ]
 then
     exit 0
 fi

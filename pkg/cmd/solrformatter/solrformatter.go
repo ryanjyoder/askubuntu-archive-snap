@@ -8,10 +8,12 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 	"sync"
 
 	"github.com/ryanjyoder/sofp"
 	"golang.org/x/sync/semaphore"
+	"jaytaylor.com/html2text"
 )
 
 func main() {
@@ -94,6 +96,14 @@ func formatDocument(line string) (string, error) {
 	if questionID == 0 {
 		questionID = *row.ID
 	}
+
+	body, err := html2text.FromString(row.Body, html2text.Options{})
+	if err != nil {
+		return "", err
+	}
+
+	summary := summarize(body)
+
 	doc := Doc{Fields: []Field{{
 		Name:  "Id",
 		Value: fmt.Sprintf("%d", *row.ID),
@@ -105,12 +115,37 @@ func formatDocument(line string) (string, error) {
 		Value: row.Title,
 	}, {
 		Name:  "Body",
-		Value: row.Body,
+		Value: body,
+	}, {
+		Name:  "Summary",
+		Value: summary,
 	}}}
 
 	xmlBytes, _ := xml.Marshal(doc)
 	return string(xmlBytes), nil
 
+}
+
+func summarize(s string) string {
+	maxLen := 400
+	if len(s) < maxLen {
+		return s
+	}
+	words := strings.FieldsFunc(s, func(r rune) bool {
+		return r == ' ' || r == '\n'
+	})
+
+	curLen := 0
+	lastWordInSum := 0
+	for i := range words {
+		additionalLen := 1 + len(words[i])
+		if curLen+additionalLen > maxLen {
+			break
+		}
+		lastWordInSum = i
+		curLen = curLen + additionalLen
+	}
+	return strings.Join(words[:lastWordInSum], " ")
 }
 
 func pointerToString(p *string) string {

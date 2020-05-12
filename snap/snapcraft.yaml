@@ -62,7 +62,7 @@ parts:
   static:
     source: static
     plugin: dump
-    stage-packages: [curl]
+    stage-packages: [curl, gettext-base]
 
   archive:
     plugin: dump
@@ -103,3 +103,9 @@ parts:
     source: https://apache.osuosl.org/lucene/solr/8.5.1/solr-8.5.1.tgz
     plugin: dump
     stage-packages: [default-jre]
+  
+  solr-tools:
+    source: https://github.com/ryanjyoder/solr-tools.git
+    source-branch: maven-compiler-version
+    plugin: maven
+    maven-options: [package]

@@ -7,8 +7,20 @@ if [ ! -z "$LISTEN_PORT" ]; then
 fi
 
 
-export SOLR_SERVER_DIR="$SNAP_COMMON/server"
-export POSTS_XML="$SNAP/Posts.xml"
-export INDEX_DB="$SNAP/lookup.db"
+SOLR_SERVER_DIR="$SNAP_COMMON/server"
+export SOLR_SERVER_DIR
+
+POSTS_XML="$SNAP/Posts.xml"
+export POSTS_XML
+
+INDEX_DB="$SNAP/lookup.db"
+export INDEX_DB
+
+SOLR_PASSWORD_FILE="$SNAP_DATA/solr_password"
+export SOLR_PASSWORD_FILE
+
+SOLR_AUTH_TYPE="basic"
+export SOLR_AUTH_TYPE
+
 
 exec "$@"

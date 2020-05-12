@@ -2,14 +2,27 @@
 
 
 conf_dir="$SOLR_SERVER_DIR/conf"
+security_json="$SOLR_SERVER_DIR/solr/security.json"
 
-if [ ! -d "$conf_dir" ]; then
+if [ ! -f "$security_json" ]; then
     cp -r "$SNAP/server" "$SOLR_SERVER_DIR"
     cp -r "$SNAP/server/solr/configsets/_default/conf" "$conf_dir"
+
+    rm -f "$SOLR_PASSWORD_FILE"
+    touch "$SOLR_PASSWORD_FILE"
+    chmod 600 "$SOLR_PASSWORD_FILE"
+    solr_password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
+    salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
+    export salt
+    echo "$solr_password" >> $SOLR_PASSWORD_FILE
+    solrhashsalt=`java -jar "$SNAP/jar/solr-tools-1.0-SNAPSHOT.jar" "$solr_password" "$salt" | head -n 2 | tail -n 1`
+    export solrhashsalt
+    envsubst < "$SNAP/security.json" > "$security_json"
 fi
 
 snapctl start ${SNAP_NAME}.buildindex &
 
 snapctl start 
 
+unset SOLR_AUTH_TYPE
 solr start -force -f 

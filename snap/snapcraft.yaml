@@ -106,6 +106,6 @@ parts:
   
   solr-tools:
     source: https://github.com/ryanjyoder/solr-tools.git
-    source-branch: maven-compiler-version
+    source-branch: master
     plugin: maven
     maven-options: [package]

@@ -2,12 +2,20 @@
     "authentication":{
        "blockUnknown": true,
        "class":"solr.BasicAuthPlugin",
-       "credentials":{"solr":"$solrhashsalt"}
+       "credentials":{
+          "solr":"$solrhashsalt",
+         "guest":"IV0EHq1OnNrj6gvRCwvFwTrZ1+z1oBbnQdiVC3otuq0= Ndd7LKvVBAaZIF0QAVi1ekCfAJXr1GGfLtRUXhgrF8c="
+      }
     },
     "authorization":{
        "class":"solr.RuleBasedAuthorizationPlugin",
-       "permissions":[{"name":"security-edit",
-          "role":"admin"}],
-       "user-role":{"solr":"admin"}
+       "permissions":[
+         {"name":"security-edit", "role":"admin"},
+         {"name":"read", "role":"guest"}
+         ],
+       "user-role":{
+          "solr":"admin",
+          "guest":"guest"
+         }
     }}
     

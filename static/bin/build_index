@@ -30,7 +30,8 @@ curl "http://solr:$solr_password@localhost:8983/solr/askubuntu/schema" -X POST -
     "add-field" : {"name":"Id", "type":"string", "multiValued":false, "stored":true, "required":true},
     "add-field" : {"name":"QuestionId", "type":"string", "multiValued":false, "stored":true, "required":true},
     "add-field" : {"name":"Title", "type":"text_en", "stored":true, "indexed":true},
-    "add-field" : {"name":"Body", "type":"text_en", "stored":false, "indexed":true}
+    "add-field" : {"name":"Body", "type":"text_en", "stored":false, "indexed":true},
+    "add-field" : {"name":"Summary", "type":"text_en", "stored":true, "indexed":false}
 }'
 
 cat "$POSTS_XML" | solrformatter | post -d -c askubuntu -u solr $SOLR_AUTHENTICATION_OPTS

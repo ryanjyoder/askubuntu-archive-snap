@@ -127,7 +127,7 @@ func formatDocument(line string) (string, error) {
 }
 
 func summarize(s string) string {
-	maxLen := 400
+	maxLen := 200
 	if len(s) < maxLen {
 		return s
 	}

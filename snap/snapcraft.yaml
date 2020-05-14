@@ -1,12 +1,11 @@
-name: askubuntu # you probably want to 'snapcraft register <name>'
-base: core18 # the base snap is the execution environment for this snap
-version: '0.1' # just for humans, typically '1.2+git' or '1.3.2'
-summary: Single-line elevator pitch for your amazing snap # 79 char long summary
+name: askubuntu
+base: core18
+version: '0.1'
+summary: AskUbuntu Archive. Offline search and viewing.
 description: |
-  This is my-snap's description. You have a paragraph or two to tell the
-  most important story about your snap. Keep it under 100 words though,
-  we live in tweetspace and your description wants to look good in the snap
-  store.
+  A completely offline copy of AskUbuntu. Includes a JSON API and command line interface. It's intended to be lightweight enough to be run on a Raspberry Pi with only a giga of memory.
+  On the first download it will index the archive for searching. This can take a minute or two depending on your system.
+  (Still very alpha)
 
 grade: devel 
 confinement: strict
@@ -66,8 +65,8 @@ parts:
 
   archive:
     plugin: dump
-    #source: https://archive.org/download/stackexchange/askubuntu.com.7z
-    source: http://192.168.1.104:8080/stackexchange/askubuntu.com.7z
+    source: https://archive.org/download/stackexchange/askubuntu.com.7z
+    #source: http://192.168.1.104:8080/stackexchange/askubuntu.com.7z
     #source: archive
     build-packages: [p7zip-full, sqlite3, mawk]
     stage-packages: [sqlite3]

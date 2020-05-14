@@ -31,9 +31,16 @@ func main() {
 		log.Fatal("LISTEN_PORT must be an integer")
 	}
 
-	store, err := askubuntu.NewXmlStoreFromFilenames(postXml, indexFile)
+	store, err := askubuntu.NewXmlStoreFromConfigs(askubuntu.StoreConfigs{
+		XmlFilename:    postXml,
+		DBFilename:     indexFile,
+		SolrURL:        "http://localhost:8983/solr",
+		SolrUser:       "guest",
+		SolrPassword:   "SolrRocks",
+		SolrCollection: "askubuntu",
+	})
 	if err != nil {
-		log.Fatal("couldn't get data store:", err)
+		log.Fatalln("Error opening store: ", err)
 	}
 
 	r := gin.New()

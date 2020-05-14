@@ -38,27 +38,23 @@ func main() {
 		SolrCollection: "askubuntu",
 	})
 	if err != nil {
-		fmt.Errorf("couldn't get data store: %v", err)
+		log.Fatalf("couldn't get data store: %v\n", err)
 	}
 
 	if len(os.Args) < 2 {
-		log.Fatal("First argument must be either, 'questions' or 'search'")
+		FatalOnError(fmt.Errorf("First argument must be either, 'questions' or 'search'"), "")
 	}
 
 	cmdArgs := os.Args[2:]
 	switch os.Args[1] {
 	case QUESTIONS_CMD:
 		err := doQuestions(store, cmdArgs)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		FatalOnError(err, "Failed to retreive question")
 	case SEARCH_CMD:
 		err := doSearch(store, cmdArgs)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		FatalOnError(err, "Search failed")
 	default:
-		log.Fatalln("Unknown command:", os.Args[1])
+		FatalOnError(fmt.Errorf("Unknown command: %s", os.Args[1]), "")
 	}
 }
 
@@ -84,6 +80,10 @@ func doQuestions(store askubuntu.Store, args []string) error {
 }
 
 func doSearch(store askubuntu.Store, args []string) error {
+	if len(args) < 1 {
+		return fmt.Errorf("search requires a search query")
+	}
+
 	ctx := context.Background()
 	results, err := store.Search(ctx, args)
 	if err != nil {
@@ -93,6 +93,22 @@ func doSearch(store askubuntu.Store, args []string) error {
 	jsonbytes, _ := json.Marshal(results)
 	fmt.Println(string(jsonbytes))
 	return nil
+}
+
+func FatalOnError(err error, msg string) {
+	if err == nil {
+		return
+	}
+	fmt.Fprintf(os.Stderr, `
+Usage: 
+	askubuntu.cli questions <question_id>
+OR
+	askubuntu.cli search <search query>
+	
+%s:
+	%s
+	`, msg, err.Error())
+	os.Exit(1)
 }
 
 func ignore(...interface{}) {

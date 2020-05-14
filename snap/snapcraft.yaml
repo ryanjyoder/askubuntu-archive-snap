@@ -7,6 +7,10 @@ description: |
   On the first download it will index the archive for searching. This can take a minute or two depending on your system.
   (Still very alpha)
 
+  Usage:
+    $ askubunt.cli questions <question_id>
+    $ askubunt.cli search <your search query>
+
 grade: devel 
 confinement: strict
 environment:

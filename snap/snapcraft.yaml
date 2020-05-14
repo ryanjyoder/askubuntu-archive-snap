@@ -15,6 +15,7 @@ environment:
 apps:
   cli:
     command: cli
+    plugs: [network]
     command-chain: [bin/get-configs]
 
   solr:

@@ -16,6 +16,9 @@ export POSTS_XML
 INDEX_DB="$SNAP/lookup.db"
 export INDEX_DB
 
+TEMPLATES_DIR="$SNAP/templates"
+export TEMPLATES_DIR
+
 SOLR_PASSWORD_FILE="$SNAP_DATA/solr_password"
 export SOLR_PASSWORD_FILE
 

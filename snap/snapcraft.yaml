@@ -104,7 +104,7 @@ parts:
     
   solr:
     after: [archive]
-    source: https://apache.osuosl.org/lucene/solr/8.5.1/solr-8.5.1.tgz
+    source: https://apache.osuosl.org/lucene/solr/8.7.0/solr-8.7.0.tgz
     plugin: dump
     stage-packages: [default-jre]
   
